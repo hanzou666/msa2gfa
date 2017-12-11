@@ -4,7 +4,7 @@ A script to extract graph structure from multiple sequence alignment result and 
 
 ## Example
 
-[msa](./small/msa.png)
+![msa](./sample/msa.png)
 
 ### Transform
 
@@ -20,7 +20,7 @@ $ ./msa2gfa.py -f ./sample/msa.fa > ./sample/graph.gfa
 $ vg view -Fv ./sample/graph.gfa|vg view -dpn -|dot -T png -o ./small/graph.png
 ```
 
-[dot](./small/test.png)
+![dot](./sample/test.png)
 
 2. TubeMap
 
@@ -31,4 +31,4 @@ $ ./msa2gfa.py -jf ./sample/msa.fa|pbcopy
 Transform fasta to JSON, then Copy & Paste to [GraphGenomeBrowser](http://graphgenome.tk/demo3/)
 
 
-[tubemap](./small/tubemap.png)
+![tubemap](./sample/tubemap.png)
