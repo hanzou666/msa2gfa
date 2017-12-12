@@ -85,14 +85,14 @@ def get_node(fasta_dic):
     for tmp_coordinate_info in zip(*coordinate_info_list):
         base_set = set([i[1] for i in tmp_coordinate_info])
         if len(base_set) == 1:
-            node_list.append({'base': list(base_set)[0],
+            node_list.append({'base': list(base_set)[0].upper(),
                               'seq_name': [i[0] for i in tmp_coordinate_info]})
         else:
-            for base in base_set:
-                if base != '-':
-                    node_list.append({'base': base,
-                                      'seq_name': [i[0] for i in tmp_coordinate_info
-                                                   if i[1] == base]})
+            for tmp_base in base_set:
+                base = '' if tmp_base == '-' else tmp_base.upper()
+                node_list.append({'base': base,
+                                  'seq_name': [i[0] for i in tmp_coordinate_info
+                                               if i[1] == tmp_base]})
     return {i: j for i, j in enumerate(node_list, 1)}
 
 
@@ -113,6 +113,10 @@ def merge_nodes(node_dic, seq_name_list, first_id):
             start_id = single_link_dic[end_id]
             node_dic[start_id]['base'] += node_dic[end_id]['base']
             del node_dic[end_id]
+    tmp_id_list = [i for i in sorted(node_dic.keys())]
+    for tmp_id in tmp_id_list:
+        if node_dic[tmp_id]['base'] == '':
+            del node_dic[tmp_id]
     merged_node_dic = {i: node_dic[j]
                        for i, j in enumerate(sorted(node_dic.keys()), first_id)}
     next_id = max(merged_node_dic.keys()) + 1
