@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # author: Shuho Ohwada
-# date: 2017/12/11
+# date: 2017/1/18
 
 """
 Extract graph structure from multiple alignment result and output as GFA/JSON for vg
@@ -161,7 +161,11 @@ def transform_to_vg_like_graph(node_dic, edge_dic, seq_name_list):
         for node_id in sorted(node_dic.keys()):
             if seq_name in node_dic[node_id]['seq_name']:
                 i += 1
-                tmp_mapping_list.append({'position': {'node_id': node_id}, 'rank': i})
+                node_len = len(node_dic[node_id]['base'])
+                tmp_mapping_list.append({'position': {'node_id': node_id},
+                                         'rank': i,
+                                         'edit': [{'from_length': node_len,
+                                                   'to_length': node_len}]})
         vg_like_graph['path'].append(
             {'name': seq_name, 'mapping': tmp_mapping_list})
     return vg_like_graph
