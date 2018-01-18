@@ -186,15 +186,8 @@ def output_as_gfa(vg_like_graph):
     for tmp_path in vg_like_graph['path']:
         seq_name = tmp_path['name']
         mapping_list = tmp_path['mapping']
-        node_len_dic = {i['id']: len(i['sequence']) for i in vg_like_graph['node']}
-        tmp_path_list = []
-        tmp_len_list = []
-        for mapping in mapping_list:
-            node_id = mapping['position']['node_id']
-            tmp_path_list.append('{}+'.format(node_id))
-            tmp_len_list.append('{}M'.format(node_len_dic[node_id]))
-        path_csv = ','.join(tmp_path_list)
-        len_csv = ','.join(tmp_len_list)
+        path_csv = ','.join('{}+'.format(str(i['position']['node_id'])) for i in mapping_list)
+        len_csv = ','.join('{}M'.format(str(i['edit'][0]['from_length'])) for i in mapping_list)
         sys.stdout.write('P\t{}\t{}\t{}\n'.format(seq_name, path_csv, len_csv))
     for node in vg_like_graph['node']:
         sys.stdout.write('S\t{}\t{}\n'.format(node['id'], node['sequence']))
