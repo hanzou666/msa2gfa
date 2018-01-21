@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # author: Shuho Ohwada
-# date: 2017/1/18
+# date: 2017/1/21
 
 """
 Extract graph structure from multiple alignment result and output as GFA/JSON for vg
@@ -96,14 +96,10 @@ def get_node(fasta_dic):
                     node_list.append({'base': '', 'seq_name': [seqid]})
         else:
             base_set = set([i[1] for i in tmp_coordinate_info])
-            if len(base_set) == 1:
-                node_list.append({'base': list(base_set)[0].upper(),
-                                  'seq_name': [i[0] for i in tmp_coordinate_info]})
-            else:
-                for tmp_base in base_set:
-                    node_list.append({'base': tmp_base.upper(),
-                                      'seq_name': [i[0] for i in tmp_coordinate_info
-                                                   if i[1] == tmp_base]})
+            for base in base_set:
+                node_list.append({'base': base.upper(),
+                                  'seq_name': [i[0] for i in tmp_coordinate_info
+                                               if i[1] == base]})
     return {i: j for i, j in enumerate(node_list, 1)}
 
 
