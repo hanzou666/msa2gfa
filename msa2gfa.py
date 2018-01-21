@@ -83,16 +83,27 @@ def get_node(fasta_dic):
     coordinate_info_list = get_coordinate_info(fasta_dic)
     node_list = []
     for tmp_coordinate_info in zip(*coordinate_info_list):
-        base_set = set([i[1] for i in tmp_coordinate_info])
-        if len(base_set) == 1:
-            node_list.append({'base': list(base_set)[0].upper(),
-                              'seq_name': [i[0] for i in tmp_coordinate_info]})
-        else:
+        if '-' in (i[1] for i in tmp_coordinate_info):
+            # except for gap
+            base_set = set([i[1] for i in tmp_coordinate_info if i[1] != '-'])
             for tmp_base in base_set:
-                base = '' if tmp_base == '-' else tmp_base.upper()
-                node_list.append({'base': base,
+                node_list.append({'base': tmp_base.upper(),
                                   'seq_name': [i[0] for i in tmp_coordinate_info
                                                if i[1] == tmp_base]})
+            # gap
+            for seqid, tmp_base in tmp_coordinate_info:
+                if tmp_base == '-':
+                    node_list.append({'base': '', 'seq_name': [seqid]})
+        else:
+            base_set = set([i[1] for i in tmp_coordinate_info])
+            if len(base_set) == 1:
+                node_list.append({'base': list(base_set)[0].upper(),
+                                  'seq_name': [i[0] for i in tmp_coordinate_info]})
+            else:
+                for tmp_base in base_set:
+                    node_list.append({'base': tmp_base.upper(),
+                                      'seq_name': [i[0] for i in tmp_coordinate_info
+                                                   if i[1] == tmp_base]})
     return {i: j for i, j in enumerate(node_list, 1)}
 
 
