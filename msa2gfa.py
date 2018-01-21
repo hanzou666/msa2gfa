@@ -86,10 +86,10 @@ def get_node(fasta_dic):
         if '-' in (i[1] for i in tmp_coordinate_info):
             # except for gap
             base_set = set([i[1] for i in tmp_coordinate_info if i[1] != '-'])
-            for tmp_base in base_set:
-                node_list.append({'base': tmp_base.upper(),
+            for base in base_set:
+                node_list.append({'base': base.upper(),
                                   'seq_name': [i[0] for i in tmp_coordinate_info
-                                               if i[1] == tmp_base]})
+                                               if i[1] == base]})
             # gap
             for seqid, tmp_base in tmp_coordinate_info:
                 if tmp_base == '-':
