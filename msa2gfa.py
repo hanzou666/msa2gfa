@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # author: Shuho Ohwada
-# date: 2017/1/21
+# date: 2017/2/22
 
 """
 Extract graph structure from multiple alignment result and output as GFA/JSON for vg
@@ -10,7 +10,7 @@ Usage:
 msa2gfa.py -f msa.fa > graph.gfa (for a fasta file)
 msa2gfa.py -l path_list.txt > graph.gfa (for multiple fasta files)
 
-It supports for vg v1.5 and not <= v1.4.
+It supports for vg v1.5 and 1.6.0 (NOT <= v1.4).
 """
 
 import argparse
@@ -51,7 +51,7 @@ def extract_graph(fasta, first_id):
     fasta_dic = parse_fasta(fasta)
     base_node_dic = get_node(fasta_dic)
     merged_node_dic, next_id = merge_nodes(base_node_dic, fasta_dic.keys(), first_id)
-    new_edge_dic = add_edge(merged_node_dic, fasta_dic.keys())
+    new_edge_dic = add_edge(merged_node_dic, fasta_dic.keys(), first_id)
     vg_like_graph = transform_to_vg_like_graph(
         merged_node_dic, new_edge_dic, fasta_dic.keys())
     return vg_like_graph, next_id
@@ -130,7 +130,7 @@ def merge_nodes(node_dic, seq_name_list, first_id):
     return merged_node_dic, next_id
 
 
-def add_edge(node_dic, seq_name_list):
+def add_edge(node_dic, seq_name_list, first_id=1):
     """Connect nodes as undirected graph with tracing the original paths"""
     def get_first_node_id(node_dic, seq_name):
         """Find first node ID in the path"""
@@ -142,7 +142,7 @@ def add_edge(node_dic, seq_name_list):
     for seq_name in seq_name_list:
         start_id = get_first_node_id(node_dic, seq_name)
         tmp_id = start_id + 1
-        while tmp_id <= len(node_dic.keys()):
+        while tmp_id <= len(node_dic.keys()) + first_id - 1:
             if seq_name in node_dic[tmp_id]['seq_name']:
                 edge_dic[tmp_id].add(start_id)
                 edge_dic[start_id].add(tmp_id)
@@ -187,7 +187,7 @@ def output_as_json(vg_like_graph):
 def output_as_gfa(vg_like_graph):
     """Convert vg_like_graph to GFA 1.0 and output as stdout
 
-    It supports only vg v1.5.
+    It supports vg v1.5, 1.6.0.
     """
     sys.stdout.write('H\tVN:Z:1.0\n')
     for tmp_path in vg_like_graph['path']:
@@ -211,11 +211,12 @@ def main():
     elif args.list:
         first_id = 1
         vg_like_graph = {'node': [], 'edge': [], 'path': []}
-        for fasta_path in args.list:
+        for tmpline in open(args.list, 'r'):
+            fasta_path = tmpline[:-1]
             tmp_vg_like_graph, next_id = extract_graph(fasta_path, first_id)
             first_id = next_id
             for keyname in vg_like_graph:
-                vg_like_graph[keyname].append(tmp_vg_like_graph[keyname])
+                vg_like_graph[keyname] += tmp_vg_like_graph[keyname]
     else:
         sys.stderr.write(__doc__)
         sys.exit(1)
