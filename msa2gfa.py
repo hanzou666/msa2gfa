@@ -10,7 +10,7 @@ Usage:
 msa2gfa.py -f msa.fa > graph.gfa (for a fasta file)
 msa2gfa.py -l path_list.txt > graph.gfa (for multiple fasta files)
 
-It supports for vg v1.5 and 1.6.0 (NOT <= v1.4).
+It supports for vg >=v1.5.
 """
 
 import argparse
@@ -187,7 +187,7 @@ def output_as_json(vg_like_graph):
 def output_as_gfa(vg_like_graph):
     """Convert vg_like_graph to GFA 1.0 and output as stdout
 
-    It supports vg v1.5, 1.6.0.
+    It supports vg >=v1.5.
     """
     sys.stdout.write('H\tVN:Z:1.0\n')
     for tmp_path in vg_like_graph['path']:
