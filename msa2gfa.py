@@ -10,7 +10,7 @@ Usage:
 msa2gfa.py -f msa.fa > graph.gfa (for a fasta file)
 msa2gfa.py -l path_list.txt > graph.gfa (for multiple fasta files)
 
-It supports for vg v1.5 and 1.6.0 (NOT <= v1.4).
+It supports for vg >=v1.5.
 """
 
 import argparse
@@ -35,20 +35,18 @@ def get_argument():
     return args
 
 
-def extract_graph(fasta, first_id):
+def extract_graph(fasta_dic, first_id):
     """Extract graph structure from input fasta file with msa
 
     input: txtfile(fasta format), int(first node id)
     output: dict(node, edge, path), int(next node id)
 
     Method:
-    1. Parse a fasta file
-    2. Get node per base with eliminating duplication in the same coordinate
-    3. Merge nodes in a non-branch area in one graph into one node
-    4. Add edge using node path information
-    5. Transform node and edge to vg like graph
+    1. Get node per base with eliminating duplication in the same coordinate
+    2. Merge nodes in a non-branch area in one graph into one node
+    3. Add edge using node path information
+    4. Transform node and edge to vg like graph
     """
-    fasta_dic = parse_fasta(fasta)
     base_node_dic = get_node(fasta_dic)
     merged_node_dic, next_id = merge_nodes(base_node_dic, fasta_dic.keys(), first_id)
     new_edge_dic = add_edge(merged_node_dic, fasta_dic.keys(), first_id)
@@ -187,7 +185,7 @@ def output_as_json(vg_like_graph):
 def output_as_gfa(vg_like_graph):
     """Convert vg_like_graph to GFA 1.0 and output as stdout
 
-    It supports vg v1.5, 1.6.0.
+    It supports vg >=v1.5.
     """
     sys.stdout.write('H\tVN:Z:1.0\n')
     for tmp_path in vg_like_graph['path']:
@@ -207,13 +205,15 @@ def main():
     args = get_argument()
 
     if args.fasta:
-        vg_like_graph, tmp_counter = extract_graph(args.fasta, 1)
+        fasta_dic = parse_fasta(args.fasta)
+        vg_like_graph, tmp_counter = extract_graph(fasta_dic, 1)
     elif args.list:
         first_id = 1
         vg_like_graph = {'node': [], 'edge': [], 'path': []}
         for tmpline in open(args.list, 'r'):
             fasta_path = tmpline[:-1]
-            tmp_vg_like_graph, next_id = extract_graph(fasta_path, first_id)
+            fasta_dic = parse_fasta(fasta_path)
+            tmp_vg_like_graph, next_id = extract_graph(fasta_dic, first_id)
             first_id = next_id
             for keyname in vg_like_graph:
                 vg_like_graph[keyname] += tmp_vg_like_graph[keyname]
