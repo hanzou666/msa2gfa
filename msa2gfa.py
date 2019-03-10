@@ -58,13 +58,14 @@ def extract_graph(fasta_dic, first_id):
 def parse_fasta(fasta):
     """Parse fasta file as dictionary"""
     fasta_dic = {}
-    for tmpline in open(fasta, 'r'):
-        if tmpline[0] == '>':
-            seqtitle = re.match(r"^\>\s*(\S*)\s", tmpline)
-            seq_name = seqtitle.group(1)
-            fasta_dic[seq_name] = ''
-        else:
-            fasta_dic[seq_name] += tmpline[:-1]
+    with open(fasta, 'r') as f:
+        for tmpline in f:
+            if tmpline[0] == '>':
+                header = tmpline.rstrip().split()
+                seq_name = header[0][1:]
+                fasta_dic[seq_name] = ''
+            else:
+                fasta_dic[seq_name] += tmpline.rstrip()
     return fasta_dic
 
 
