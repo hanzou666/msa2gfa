@@ -231,7 +231,7 @@ def main():
 
     if args.fasta:
         fasta_dic = parse_fasta(args.fasta)
-        vg_like_graph, tmp_counter = extract_graph(fasta_dic, 1)
+        vg_like_graph, _ = extract_graph(fasta_dic, 1)
     elif args.list:
         first_id = 1
         vg_like_graph = {'node': [], 'edge': [], 'path': []}
