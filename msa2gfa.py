@@ -4,7 +4,8 @@
 # date: 2017/2/22
 
 """
-Extract graph structure from multiple alignment result and output as GFA/JSON for vg
+Extract graph structure from multiple alignment result and output
+as GFA/JSON for vg
 
 Usage:
 msa2gfa.py -f msa.fa > graph.gfa (for a fasta file)
@@ -15,7 +16,6 @@ It supports for vg >=v1.5.
 
 import argparse
 import json
-import re
 import sys
 
 
@@ -48,7 +48,11 @@ def extract_graph(fasta_dic, first_id):
     4. Transform node and edge to vg like graph
     """
     base_node_dic = get_node(fasta_dic)
-    merged_node_dic, next_id = merge_nodes(base_node_dic, fasta_dic.keys(), first_id)
+    merged_node_dic, next_id = merge_nodes(
+        base_node_dic,
+        fasta_dic.keys(),
+        first_id
+    )
     new_edge_dic = add_edge(merged_node_dic, fasta_dic.keys(), first_id)
     vg_like_graph = transform_to_vg_like_graph(
         merged_node_dic, new_edge_dic, fasta_dic.keys())
@@ -86,9 +90,12 @@ def get_node(fasta_dic):
             # except for gap
             base_set = set([i[1] for i in tmp_coordinate_info if i[1] != '-'])
             for base in base_set:
-                node_list.append({'base': base.upper(),
-                                  'seq_name': [i[0] for i in tmp_coordinate_info
-                                               if i[1] == base]})
+                node_list.append({
+                    'base': base.upper(),
+                    'seq_name': [
+                        i[0] for i in tmp_coordinate_info if i[1] == base
+                    ]
+                })
             # gap
             for seqid, tmp_base in tmp_coordinate_info:
                 if tmp_base == '-':
@@ -96,9 +103,12 @@ def get_node(fasta_dic):
         else:
             base_set = set([i[1] for i in tmp_coordinate_info])
             for base in base_set:
-                node_list.append({'base': base.upper(),
-                                  'seq_name': [i[0] for i in tmp_coordinate_info
-                                               if i[1] == base]})
+                node_list.append({
+                    'base': base.upper(),
+                    'seq_name': [
+                        i[0] for i in tmp_coordinate_info if i[1] == base
+                    ]
+                })
     return {i: j for i, j in enumerate(node_list, 1)}
 
 
@@ -123,8 +133,8 @@ def merge_nodes(node_dic, seq_name_list, first_id):
     for tmp_id in tmp_id_list:
         if node_dic[tmp_id]['base'] == '':
             del node_dic[tmp_id]
-    merged_node_dic = {i: node_dic[j]
-                       for i, j in enumerate(sorted(node_dic.keys()), first_id)}
+    merged_node_dic = {i: node_dic[j] for i, j in enumerate(
+        sorted(node_dic.keys()), first_id)}
     next_id = max(merged_node_dic.keys()) + 1
     return merged_node_dic, next_id
 
@@ -153,14 +163,16 @@ def add_edge(node_dic, seq_name_list, first_id=1):
 def transform_to_vg_like_graph(node_dic, edge_dic, seq_name_list):
     """Shape graph structure as vg like graph dict"""
     vg_like_graph = {'node': [], 'edge': [], 'path': []}
-    vg_like_graph['node'] = [{'name': str(i),
-                              'sequence': j['base'],
-                              'id': i}
-                             for i, j in sorted(node_dic.items())]
+    vg_like_graph['node'] = [{
+        'name': str(i),
+        'sequence': j['base'],
+        'id': i
+    } for i, j in sorted(node_dic.items())]
     for start_id, end_ids in sorted(edge_dic.items()):
-        vg_like_graph['edge'] += [{'from': start_id, 'to': end_id}
-                                  for end_id in sorted(end_ids)
-                                  if end_id > start_id]
+        vg_like_graph['edge'] += [{
+            'from': start_id,
+            'to': end_id
+        } for end_id in sorted(end_ids) if end_id > start_id]
     for seq_name in seq_name_list:
         tmp_mapping_list = []
         i = 0
@@ -168,12 +180,18 @@ def transform_to_vg_like_graph(node_dic, edge_dic, seq_name_list):
             if seq_name in node_dic[node_id]['seq_name']:
                 i += 1
                 node_len = len(node_dic[node_id]['base'])
-                tmp_mapping_list.append({'position': {'node_id': node_id},
-                                         'rank': i,
-                                         'edit': [{'from_length': node_len,
-                                                   'to_length': node_len}]})
-        vg_like_graph['path'].append(
-            {'name': seq_name, 'mapping': tmp_mapping_list})
+                tmp_mapping_list.append({
+                    'position': {'node_id': node_id},
+                    'rank': i,
+                    'edit': [{
+                        'from_length': node_len,
+                        'to_length': node_len
+                    }]
+                })
+        vg_like_graph['path'].append({
+            'name': seq_name,
+            'mapping': tmp_mapping_list
+        })
     return vg_like_graph
 
 
@@ -192,13 +210,19 @@ def output_as_gfa(vg_like_graph):
     for tmp_path in vg_like_graph['path']:
         seq_name = tmp_path['name']
         mapping_list = tmp_path['mapping']
-        path_csv = ','.join('{}+'.format(str(i['position']['node_id'])) for i in mapping_list)
-        len_csv = ','.join('{}M'.format(str(i['edit'][0]['from_length'])) for i in mapping_list)
+        path_csv = ','.join('{}+'.format(
+            str(i['position']['node_id'])) for i in mapping_list
+        )
+        len_csv = ','.join('{}M'.format(
+            str(i['edit'][0]['from_length'])) for i in mapping_list
+        )
         sys.stdout.write('P\t{}\t{}\t{}\n'.format(seq_name, path_csv, len_csv))
     for node in vg_like_graph['node']:
         sys.stdout.write('S\t{}\t{}\n'.format(node['id'], node['sequence']))
     for edge in vg_like_graph["edge"]:
-        sys.stdout.write('L\t{}\t+\t{}\t+\t0M\n'.format(edge['from'], edge['to']))
+        sys.stdout.write(
+            'L\t{}\t+\t{}\t+\t0M\n'.format(edge['from'], edge['to'])
+        )
 
 
 def main():
